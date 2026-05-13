@@ -905,7 +905,7 @@ Write sections: Executive Summary, Risk Rating (Low/Medium/High/Critical), Key F
 
     try {
       // Calls your local Express backend — no CORS issues, key stays in .env
-      const res = await fetch("/api/generate-report", {
+      const res = await fetch("https://phishsim-backend.onrender.com/api/generate-report",{
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
