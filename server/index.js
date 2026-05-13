@@ -507,7 +507,6 @@ Organization-wide susceptibility is currently at **${stats?.clickRate || 0}%**. 
 2. **Technical Control:** Enable Multi-Factor Authentication (MFA) to mitigate the impact of the ${stats?.submitted || 0} potentially leaked credentials.
 3. **Lure Awareness:** The urgency used in this simulation was highly effective; future training should emphasize "Pressure Tactics" detection.
   `;
-
   res.json({ text: localReport });
 });
 
