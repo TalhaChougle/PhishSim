@@ -1,157 +1,73 @@
-# 🎣 PhishSim — Phishing Campaign Simulation Platform
+🛡️ PhishSim: Security Awareness & Reporting Tool
+PhishSim is a full-stack cybersecurity training platform designed to simulate phishing campaigns and provide deep-dive security analytics. It features an automated reporting engine that utilizes Google Gemini AI for executive summaries, with a robust local heuristic fallback for offline analysis.
 
-> Controlled GoPhish-style platform for security awareness training.
-> Tracks click rates, credential submissions, and auto-generates AI security reports.
+🚀**[Live Demo](https://phishsim-csi.pages.dev/)**(Note: The backend is hosted on a free tier; please allow 30–50 seconds for the initial server wake-up if the report generation feels slow.)
 
----
+🏗️ Architecture & Features
+The project is built with a decoupled architecture to ensure scalability and professional-grade performance.
 
-## ⚠️ Legal Disclaimer
+Frontend: React-based terminal-style UI with glassmorphic design.
 
-This tool is for **authorized security awareness training only**.  
-Always obtain **written permission** before running simulations against real users.  
-Never use against systems/users you don't have explicit authorization for.
+Backend: Express.js server handling data processing and AI integration.
 
----
+AI Reporting: Integrated with Gemini 2.0 Flash to generate professional security posture reports based on campaign metadata.
 
-## 🏗️ Architecture
+Graceful Degradation: A custom-built Local Heuristics Engine ensures reporting remains 100% operational even if the AI API is unreachable or the API key is missing.
 
-```
-phishsim/
-├── server/          Express.js backend
-│   ├── index.js     API + tracking server
-│   ├── phishsim.db  SQLite database (auto-created)
-│   └── .env         Config (copy from .env.example)
-├── client/          React + Vite frontend
-│   └── src/
-│       ├── App.jsx  Main UI
-│       └── api.js   API client
-└── package.json     Root scripts
-```
+Security: Environment variable management to protect sensitive API credentials and secure CORS configuration.
 
-**Backend** (Express.js + SQLite):
-- REST API for campaign management
-- Real tracking tokens per target (UUID)
-- Click & credential submission tracking
-- Email sending via Nodemailer (real SMTP or Ethereal test)
-- Credential harvest landing page served by server
+🛠️ Tech Stack
+Frontend
+Framework: React (Vite)
 
-**Frontend** (React + Vite):
-- Campaign builder (templates, custom CSV targets)
-- Live dashboard with 3-second polling
-- Simulation sandbox (step into any target's inbox)
-- AI report generation via Claude API
+Styling: CSS3 (Custom Glassmorphism)
 
----
+Deployment: Cloudflare Pages
 
-## 🚀 Quick Start
+Backend
+Runtime: Node.js
 
-### 1. Install dependencies
+Framework: Express.js
 
-```bash
-# Install root concurrently
-npm install
+AI Model: Google Gemini 2.0 Flash
 
-# Install server + client deps
-npm run install:all
-```
+Deployment: Render
 
-### 2. Configure environment
+🚦 Getting Started
+Prerequisites
+Node.js (v18+)
 
-```bash
+npm or yarn
+
+A Google AI Studio API Key
+
+Installation
+Clone the repository:
+
+Bash
+git clone https://github.com/TalhaChougle/PhishSim.git
+cd PhishSim
+Setup Backend:
+
+Bash
 cd server
-cp .env.example .env
-# Edit .env — at minimum set BASE_URL for real email tracking
-```
+npm install
+# Create a .env file and add your GEMINI_API_KEY
+node index.js
+Setup Frontend:
 
-### 3. Run (dev mode)
-
-```bash
-# From root — starts both server (port 3001) and client (port 5173)
+Bash
+cd client
+npm install
 npm run dev
-```
+🔒 Security Best Practices
+This project implements professional security standards for deployment:
 
-Open **http://localhost:5173**
+Cross-Origin Resource Sharing (CORS): Restricted to specific allowed origins to prevent unauthorized API access.
 
----
+Credential Protection: .env files are excluded from version control via .gitignore.
 
-## 📧 Email Configuration
+API Safety: Server-side masking and processing of AI prompts to prevent credential leakage.
 
-### Option A: Ethereal (test, no real email sent)
-Leave `.env` SMTP fields empty. The `/send` API response includes a **preview URL** to view the email in browser.
-
-### Option B: Mailtrap (recommended for testing)
-```
-SMTP_HOST=sandbox.smtp.mailtrap.io
-SMTP_PORT=2525
-SMTP_USER=<from mailtrap dashboard>
-SMTP_PASS=<from mailtrap dashboard>
-```
-
-### Option C: Gmail
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=you@gmail.com
-SMTP_PASS=your-app-password   # Google App Password, not real password
-```
-
----
-
-## 🔌 API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/campaigns` | List all campaigns |
-| POST | `/api/campaigns` | Create campaign |
-| GET | `/api/campaigns/:id` | Get campaign + targets |
-| DELETE | `/api/campaigns/:id` | Delete campaign |
-| POST | `/api/campaigns/:id/send` | Send phishing emails |
-| GET | `/api/campaigns/:id/stats` | Click/submit stats |
-| GET | `/api/campaigns/:id/events` | Event log |
-| POST | `/api/campaigns/:id/simulate-click` | Sandbox: record click |
-| POST | `/api/campaigns/:id/simulate-submit` | Sandbox: record submission |
-| GET | `/track/:token` | Tracking link (serves harvest page) |
-| POST | `/track/:token/submit` | Record credential submission |
-
----
-
-## 🚢 Deployment (Render + Vercel)
-
-### Backend → Render
-1. Push to GitHub
-2. New Web Service → `server/` directory
-3. Build: `npm install`
-4. Start: `node index.js`
-5. Set env vars: `PORT`, `BASE_URL` (your Render URL), SMTP config
-
-### Frontend → Vercel
-1. New project → `client/` directory
-2. Framework: Vite
-3. Set `VITE_API_URL` if not using proxy (update `api.js` BASE)
-
----
-
-## 🔒 Security Notes
-
-- Credential submissions are tracked (event logged) but **actual passwords are never stored**
-- All tracking uses opaque UUID tokens, not PII in URLs  
-- Run only against `@testorg.local` or lab domains by default
-- Database is local SQLite — use PostgreSQL for production
-
----
-
-## 📋 Features
-
-- [x] Campaign creation with 4 phishing templates (urgency, financial, authority, curiosity)
-- [x] Custom CSV target import
-- [x] Real email sending (Nodemailer + SMTP/Ethereal)
-- [x] Unique tracking token per target
-- [x] Click tracking (timestamp, IP, user agent)
-- [x] Credential harvest landing page
-- [x] Credential submission tracking
-- [x] Live dashboard (3s polling)
-- [x] Department vulnerability breakdown
-- [x] Simulation sandbox (no email needed)
-- [x] AI-generated security awareness reports (Claude API)
-- [x] Export report as .txt
-- [x] SQLite persistence
+👤 Author
+Talha Chougle
