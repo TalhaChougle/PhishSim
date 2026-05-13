@@ -460,6 +460,7 @@ app.post("/api/generate-report", async (req, res) => {
     const { stats, campaignName, prompt } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
+    // 1. Try AI first if key exists
     if (apiKey) {
         try {
             const response = await fetch(
@@ -469,24 +470,22 @@ app.post("/api/generate-report", async (req, res) => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { maxOutputTokens: 1200, temperature: 0.7 },
                     }),
                 }
             );
 
             if (response.ok) {
                 const data = await response.json();
-                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text) return res.json({ text });
+                const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (aiText) return res.json({ text: aiText });
             }
         } catch (e) {
-            console.error("AI Error, falling back to Local Analysis:", e.message);
+            console.error("AI Error:", e.message);
         }
     }
 
-    const topDept = Object.entries(stats?.byDepartment || {})
-        .sort(([, a], [, b]) => (b.clicked / b.total) - (a.clicked / a.total))[0];
-
+    // 2. Fallback: Always return this if AI is skipped or fails
+    const topDept = Object.entries(stats?.byDepartment || {}).sort(([, a], [, b]) => (b.clicked / b.total) - (a.clicked / a.total))[0];
     const riskLevel = stats?.clickRate > 20 ? "🔴 CRITICAL" : "🟡 MODERATE";
 
     const localReport = `
@@ -494,14 +493,14 @@ app.post("/api/generate-report", async (req, res) => {
 *Generated via Local Heuristics Engine*
 
 ### **Security Posture: ${riskLevel}**
-Organization-wide susceptibility is currently at **${stats?.clickRate || 0}%**.
+Organization-wide susceptibility is at **${stats?.clickRate || 0}%**.
 
 ### **Target Analysis**
 - **Primary Risk Group:** The **${topDept ? topDept[0] : "General"}** department exhibited the highest engagement.
-- **Compromise Depth:** ${stats?.submitted || 0} individuals proceeded to share credentials.
+- **Compromise Depth:** ${stats?.submitted || 0} individuals shared credentials.
 
 ### **Strategic Recommendations**
-1. **Targeted Training:** Conduct an immediate workshop for the ${topDept ? topDept[0] : "identified"} team.
+1. **Targeted Training:** Prioritize workshops for high-risk teams.
 2. **Technical Control:** Enable Multi-Factor Authentication (MFA).
 `;
 
