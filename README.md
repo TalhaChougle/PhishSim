@@ -1,5 +1,9 @@
 🛡️ PhishSim: Security Awareness & Reporting Tool
+
 PhishSim is a full-stack cybersecurity training platform designed to simulate phishing campaigns and provide deep-dive security analytics. It features an automated reporting engine that utilizes Google Gemini AI for executive summaries, with a robust local heuristic fallback for offline analysis.
+
+<img width="1917" height="976" alt="image" src="https://github.com/user-attachments/assets/ff25b19d-96a7-4716-8953-0a7122394f38" />
+
 
 🚀**[Live Demo](https://phishsim-csi.pages.dev/)**(Note: The backend is hosted on a free tier; please allow 30–50 seconds for the initial server wake-up if the report generation feels slow.)
 
