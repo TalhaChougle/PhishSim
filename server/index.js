@@ -14,8 +14,12 @@ const PORT = process.env.PORT || 3001;
 const DB_PATH = join(__dirname, "phishsim.db");
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true,
+  origin: [
+    'http://localhost:5173', 
+    'https://phishsim-csi.pages.dev/' // <--- ADD YOUR CLOUDFLARE URL HERE
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true
 }));
 app.use(express.json());
 
