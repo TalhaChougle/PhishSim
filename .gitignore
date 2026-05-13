@@ -1,0 +1,10 @@
+node_modules/
+server/node_modules/
+client/node_modules/
+server/.env
+server/phishsim.db
+dist/
+client/dist/
+.DS_Store
+Thumbs.db
+*.log
