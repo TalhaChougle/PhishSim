@@ -476,14 +476,13 @@ app.post("/api/generate-report", async (req, res) => {
       );
 
       if (response.ok) {
-        const data = await response.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return res.json({ text });
-      }
+            const data = await response.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) return res.json({ text }); // Success: Send AI Report
+        }
     } catch (e) {
-      console.error("AI Error, falling back to Local Analysis:", e.message);
+        console.error("AI Error, falling back to Local Analysis:", e.message);
     }
-  }
 
   // 2. Intelligent Local Fallback (Interviewer-Ready Logic)
   // This generates a dynamic report based on actual campaign data
