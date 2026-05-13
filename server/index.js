@@ -457,57 +457,55 @@ function harvestPage(token, org) {
 
 // ─── Gemini Report Generation ─────────────────────────────────────────────────
 app.post("/api/generate-report", async (req, res) => {
-  const { stats, campaignName, prompt } = req.body;
-  const apiKey = process.env.GEMINI_API_KEY;
+    const { stats, campaignName, prompt } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
 
-  // 1. Attempt AI Generation
-  if (apiKey) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 1200, temperature: 0.7 },
-          }),
-        }
-      );
+    if (apiKey) {
+        try {
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { maxOutputTokens: 1200, temperature: 0.7 },
+                    }),
+                }
+            );
 
-      if (response.ok) {
-            const data = await response.json();
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) return res.json({ text }); // Success: Send AI Report
+            if (response.ok) {
+                const data = await response.json();
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) return res.json({ text });
+            }
+        } catch (e) {
+            console.error("AI Error, falling back to Local Analysis:", e.message);
         }
-    } catch (e) {
-        console.error("AI Error, falling back to Local Analysis:", e.message);
     }
 
-  // 2. Intelligent Local Fallback (Interviewer-Ready Logic)
-  // This generates a dynamic report based on actual campaign data
-  const topDept = Object.entries(stats?.byDepartment || {})
-    .sort(([, a], [, b]) => (b.clicked / b.total) - (a.clicked / a.total))[0];
+    const topDept = Object.entries(stats?.byDepartment || {})
+        .sort(([, a], [, b]) => (b.clicked / b.total) - (a.clicked / a.total))[0];
 
-  const riskLevel = stats?.clickRate > 20 ? "🔴 CRITICAL" : "🟡 MODERATE";
+    const riskLevel = stats?.clickRate > 20 ? "🔴 CRITICAL" : "🟡 MODERATE";
 
-  const localReport = `
+    const localReport = `
 ## 📊 EXECUTIVE SECURITY ANALYSIS: ${campaignName?.toUpperCase() || "CAMPAIGN"}
 *Generated via Local Heuristics Engine*
 
 ### **Security Posture: ${riskLevel}**
-Organization-wide susceptibility is currently at **${stats?.clickRate || 0}%**. This indicates a significant vulnerability to social engineering tactics.
+Organization-wide susceptibility is currently at **${stats?.clickRate || 0}%**.
 
 ### **Target Analysis**
-- **Primary Risk Group:** The **${topDept ? topDept[0] : "General"}** department exhibited the highest engagement with the simulation.
-- **Compromise Depth:** ${stats?.submitted || 0} individuals proceeded to share credentials, highlighting a need for stronger endpoint identity protection.
+- **Primary Risk Group:** The **${topDept ? topDept[0] : "General"}** department exhibited the highest engagement.
+- **Compromise Depth:** ${stats?.submitted || 0} individuals proceeded to share credentials.
 
 ### **Strategic Recommendations**
-1. **Targeted Training:** Conduct an immediate workshop for the ${topDept ? topDept[0] : "identified"} team focusing on URL inspection.
-2. **Technical Control:** Enable Multi-Factor Authentication (MFA) to mitigate the impact of the ${stats?.submitted || 0} potentially leaked credentials.
-3. **Lure Awareness:** The urgency used in this simulation was highly effective; future training should emphasize "Pressure Tactics" detection.
-  `;
-  res.json({ text: localReport });
+1. **Targeted Training:** Conduct an immediate workshop for the ${topDept ? topDept[0] : "identified"} team.
+2. **Technical Control:** Enable Multi-Factor Authentication (MFA).
+`;
+
+    return res.json({ text: localReport });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
