@@ -1,4 +1,4 @@
-const BASE = "/api";
+const BASE = "https://phishsim-backend.onrender.com/api";
 
 const req = async (method, path, body) => {
   const res = await fetch(`${BASE}${path}`, {
